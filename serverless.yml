@@ -1,0 +1,51 @@
+service: xlambda
+
+frameworkVersion: "=1.45.1"
+
+provider:
+    name: aws
+    runtime: python3.7
+    stage: dev
+    region: us-east-1
+    memorySize: 1024
+    timeout: 900
+    # deploymentBucket:
+    #     name: sls.deploys.${self:service}
+    versionFunctions: false
+    runtime: python3.7
+        environment:
+            STAGE: ${self:provider.stage}
+        tags:
+            region: ${self:provider.region}
+            runtime: python3.7
+
+functions:
+    professor:
+        handler: professor.handler
+        name: xlambda-professor-${self:provider.stage}
+        description: Central starting point for the Lambda warming process
+        events:
+            - schedule:
+                name: XLambdaSchedule
+                description: Schedule the execution of the X-Lambda warming process.
+                rate: rate(1 minute)
+                enabled: false
+                input:
+                    'action': 'run_warming'
+                    's3_bucket': 'XLambdaBucket'
+                    'config_obj_name': 'XLambdaConfig.yml'
+
+    wolverine:
+    	handler: wolverine.handler
+    	name: xlambda-wolverine-${self:provider.stage}
+        description: Get execution history, request prediction and trigger warming.
+
+    jean:
+    	handler: jean.handler
+    	name: xlambda-jean-${self:provider.stage}
+        description: Predict how many containers should be kept warm.
+
+    cyclops:
+    	handler: cyclops.handler
+    	name: xlambda-cyclops-${self:provider.stage}
+        description: Fire up Lambdas concurrently to force warming of containers.
