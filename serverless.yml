@@ -31,7 +31,6 @@ functions:
                 rate: rate(1 minute)
                 enabled: false
                 input:
-                    'action': 'run_warming'
                     's3_bucket': 'XLambdaBucket'
                     'config_obj_name': 'XLambdaConfig.yml'
 
