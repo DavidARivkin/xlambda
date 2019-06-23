@@ -13,11 +13,11 @@ provider:
     #     name: sls.deploys.${self:service}
     versionFunctions: false
     runtime: python3.7
-        environment:
-            STAGE: ${self:provider.stage}
-        tags:
-            region: ${self:provider.region}
-            runtime: python3.7
+    environment:
+        STAGE: ${self:provider.stage}
+    tags:
+        region: ${self:provider.region}
+        runtime: python3.7
 
 functions:
     professor:
@@ -28,23 +28,23 @@ functions:
             - schedule:
                 name: XLambdaSchedule
                 description: Schedule the execution of the X-Lambda warming process.
-                rate: rate(1 minute)
+                rate: rate(15 minutes)
                 enabled: false
                 input:
                     's3_bucket': 'XLambdaBucket'
                     'config_obj_name': 'XLambdaConfig.yml'
 
     wolverine:
-    	handler: wolverine.handler
-    	name: xlambda-wolverine-${self:provider.stage}
+        handler: wolverine.handler
+        name: xlambda-wolverine-${self:provider.stage}
         description: Get execution history, request prediction and trigger warming.
 
     jean:
-    	handler: jean.handler
-    	name: xlambda-jean-${self:provider.stage}
+        handler: jean.handler
+        name: xlambda-jean-${self:provider.stage}
         description: Predict how many containers should be kept warm.
 
     cyclops:
-    	handler: cyclops.handler
-    	name: xlambda-cyclops-${self:provider.stage}
+        handler: cyclops.handler
+        name: xlambda-cyclops-${self:provider.stage}
         description: Fire up Lambdas concurrently to force warming of containers.
