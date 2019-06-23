@@ -3,10 +3,8 @@ import unittest
 from unittest.mock import (
     patch,
 )
+from xlibs import constants, mutant, utils
 from xlibs.response import build
-from xlibs.utils import (
-    get_object_from_s3,
-)
 
 
 class TestResponse(unittest.TestCase):
@@ -69,7 +67,7 @@ class TestUtils(unittest.TestCase):
     @patch('xlibs.utils.boto3')
     def test_get_object_from_s3(self, boto3):
         '''Test function that gets objects from S3 storage'''
-        get_object_from_s3(
+        utils.get_object_from_s3(
             bucket='x-mansion',
             object_key='Xavier School',
         )
@@ -85,4 +83,35 @@ class TestUtils(unittest.TestCase):
         s3.get_object.assert_called_with(
             Bucket='x-mansion',
             Key='Xavier School',
+        )
+
+    def test_get_function_name(self):
+        '''Test script that gets a function name from serverless.yml'''
+        function_name = utils.get_function_name(function='wolverine')
+
+        self.assertEqual(function_name, f'xlambda-wolverine-{constants.STAGE}')
+
+
+class TestMutants(unittest.TestCase):
+    '''Test Mutant classes'''
+
+    @patch('xlibs.mutant.async_lambda')
+    def test_execute(self, async_lambda):
+        '''Test execution of Lambda invocations'''
+        requests = [
+            {'function_name': 'test1', 'payload': {'foo': 'bar'}},
+            {'function_name': 'test2', 'payload': {'foo': 'bar'}},
+            {'function_name': 'test3', 'payload': {'foo': 'bar'}},
+            {'function_name': 'test4', 'payload': {'foo': 'bar'}},
+            {'function_name': 'test5', 'payload': {'foo': 'bar'}},
+        ]
+
+        mutant_obj = mutant.Mutant()
+
+        mutant_obj.execute(requests=requests)
+
+        async_lambda.invoke_all.assert_called()
+        async_lambda.invoke_all.assert_called_with(
+            requests=requests,
+            region=constants.REGION,
         )
