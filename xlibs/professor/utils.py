@@ -1,19 +1,10 @@
 import json
-from typing import (
-    Dict,
-)
+from typing import Dict
+
+from xlibs import exc
 from xlibs.utils import *  # NOQA
-from xlibs.utils import (
-    get_object_from_s3,
-)
-from xlibs import (
-    exc,
-)
-from xlibs.professor import (
-    constants,
-    start_warming,
-    config,
-)
+from xlibs.utils import get_object_from_s3
+from xlibs.professor import constants, start_warming, config
 
 
 def execute(*, options: Dict) -> Dict:
