@@ -39,14 +39,18 @@ class Wolverine(Mutant):
         requests = [
             {
                 'function_name': self.function_name,
-                'payload': {
-                    'function': function,
-                },
+                'payload': function,
             }
             for function in functions
         ]
 
-        return self.execute(requests=requests)
+        response = self.execute(requests=requests)
+
+        return [
+            payload['data']
+            for payload in response
+            if payload['status'] == 200
+        ]
 
 
 class Jean(Mutant):
@@ -60,15 +64,18 @@ class Jean(Mutant):
         requests = [
             {
                 'function_name': self.function_name,
-                'payload': {
-                    'metrics': metrics,
-                    'timeframe': timeframe,
-                },
+                'payload': {**function, **{'timeframe': timeframe}},
             }
-            for metrics in functions_metrics
+            for function in functions_metrics
         ]
 
-        return self.execute(requests=requests)
+        response = self.execute(requests=requests)
+
+        return [
+            payload['data']
+            for payload in response
+            if payload['status'] == 200
+        ]
 
 
 class Cyclops(Mutant):
@@ -82,11 +89,15 @@ class Cyclops(Mutant):
         requests = [
             {
                 'function_name': self.function_name,
-                'payload': {
-                    'function_demand': demand,
-                },
+                'payload': function,
             }
-            for demand in functions_demand
+            for function in functions_demand
         ]
 
-        return self.execute(requests=requests)
+        response = self.execute(requests=requests)
+
+        return [
+            payload['data']
+            for payload in response
+            if payload['status'] == 200
+        ]

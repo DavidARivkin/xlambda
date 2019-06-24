@@ -70,6 +70,4 @@ def invoke_all(*, requests: List, region: str = 'us-east-1'):
 
     results = loop.run_until_complete(wrapper())
 
-    loop.close()
-
     return results

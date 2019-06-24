@@ -1,0 +1,1 @@
+[{"Id": "metrics", "MetricStat": {"Metric": {"Namespace": "AWS/Lambda", "MetricName": "ConcurrentExecutions", "Dimensions": [{"Name": "FunctionName", "Value": "test-async-lambda"}]}, "Period": 300, "Stat": "Maximum", "Unit": "Count/Second"}}]

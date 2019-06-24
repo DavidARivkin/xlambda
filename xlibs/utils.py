@@ -2,8 +2,16 @@
 import json
 from typing import Dict, List, Optional
 import boto3
-import yaml
 from xlibs import constants
+
+
+def validate_request(options: Dict) -> tuple:
+    '''Validate a request received by a Lambda function'''
+    if not all([arg in options.keys() for arg in constants.REQUIRED_ARGS]):
+        required = '", "'.join(constants.REQUIRED_ARGS)
+        return False, f'Missing required option arguments: "{required}"'
+
+    return True, 'Valid request'
 
 
 def get_object_from_s3(

@@ -27,3 +27,8 @@ class XLambdaExceptionExhaustedWarmBatches(Exception):
     Use in loop: professor.start_warming.prepare_warm_batches
     '''
     pass
+
+
+class XLambdaExceptionFailedGetMetrics(Exception):
+    '''Failed to get CloudWatch metrics for a Lambda function'''
+    pass
