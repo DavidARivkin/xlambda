@@ -1,3 +1,10 @@
+'''
+Credits to Mathew Marcus (2019)
+https://www.mathewmarcus.com/blog/
+http://archive.is/nXkCb
+
+Small syntax and organization modifications were made to the original code.
+'''
 import asyncio
 import json
 import os
@@ -15,9 +22,9 @@ AWS_CREDENTIALS = session.Session().get_credentials()
 
 def sign_headers(*, url: str, payload: Dict):
     '''Sign AWS API request headers'''
-    host_segments = urllib.parse.urlparse(url).netloc.split('.')
-    service = host_segments[0]
-    region = host_segments[1]
+    segments = urllib.parse.urlparse(url).netloc.split('.')
+    service = segments[0]
+    region = segments[1]
 
     request = awsrequest.AWSRequest(
         method='POST',
@@ -39,7 +46,7 @@ async def invoke(*, url: str, payload: Dict, session):
         return await response.json()
 
 
-def generate_invocations(*, requests: List, base_url: str, session):
+def run_invocations(*, requests: List, base_url: str, session):
     for request in requests:
         url = os.path.join(base_url, request['function_name'], 'invocations')
 
@@ -51,7 +58,7 @@ def invoke_all(*, requests: List, region: str = 'us-east-1'):
 
     async def wrapper():
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            invocations = generate_invocations(
+            invocations = run_invocations(
                 requests=requests,
                 base_url=base_url,
                 session=session,
@@ -61,4 +68,8 @@ def invoke_all(*, requests: List, region: str = 'us-east-1'):
 
     loop = asyncio.get_event_loop()
 
-    return loop.run_until_complete(wrapper())
+    results = loop.run_until_complete(wrapper())
+
+    loop.close()
+
+    return results
