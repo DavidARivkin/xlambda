@@ -8,6 +8,9 @@ DEFAULT_REGION = 'us-east-1'
 STAGE = os.environ.get('STAGE', DEFAULT_STAGE)
 REGION = os.environ.get('REGION', DEFAULT_REGION)
 
+# AWS API constants
+LAMBDA_ENDPOINT = 'https://lambda.{region}.amazonaws.com/2015-03-31/functions'
+
 # Miscellaneous
 BASE_FUNCTION_NAME = 'xlambda-{function}-{stage}'
 

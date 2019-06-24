@@ -1,7 +1,6 @@
 '''Test Professor'''
 import copy
 import json
-from typing import Optional, Dict
 import unittest
 from unittest.mock import MagicMock, patch
 import professor

@@ -1,14 +1,9 @@
 import logging
 import traceback
-from typing import (
-    Dict,
-)
-from xlibs import (
-    response,
-)
-from xlibs.professor import (
-    utils,
-)
+from typing import Dict
+
+from xlibs import response, exc
+from xlibs.professor import get_config, start_warming, utils
 
 
 logger = logging.getLogger()
@@ -19,12 +14,10 @@ def handler(event: Dict, context: Dict) -> Dict:
     '''Entry point for starting the Lambda Warming process
 
     :arg event: (dict) event input received from the invoker/trigger
-    :arg context: (dict) contextual variables provided by the Lambda platform
+    :arg context: (dict) contextual data provided by the Lambda platform
     '''
     try:
-        result = utils.execute(
-            options=event,
-        )
+        result = execute(options=event)
 
         return response.build(
             status=200,
@@ -46,3 +39,22 @@ def handler(event: Dict, context: Dict) -> Dict:
             },
             original_request=event,
         )
+
+
+def execute(*, options: Dict) -> Dict:
+    '''Execute a request received by the Professor Lambda
+    '''
+    is_request_valid, validation_msg = utils.validate_request(
+        options=options,
+    )
+
+    if not is_request_valid:
+        raise exc.XLambdaExceptionInvalidRequest(validation_msg)
+
+    # Load the configuration params
+    config = get_config(
+        bucket=options['s3_bucket'],
+        config_obj_name=options['config_obj_name'],
+    )
+
+    return start_warming.run(config=config)

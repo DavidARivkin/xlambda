@@ -7,25 +7,6 @@ from xlibs.utils import get_object_from_s3
 from xlibs.professor import constants, start_warming, config
 
 
-def execute(*, options: Dict) -> Dict:
-    '''Execute a request received by the Professor Lambda
-    '''
-    is_request_valid, validation_msg = validate_request(
-        options=options,
-    )
-
-    if not is_request_valid:
-        raise exc.XLambdaExceptionInvalidRequest(validation_msg)
-
-    # Load the configuration params
-    config = get_config(
-        bucket=options['s3_bucket'],
-        config_obj_name=options['config_obj_name'],
-    )
-
-    return start_warming.run(config=config)
-
-
 def validate_request(options: Dict) -> tuple:
     '''Validate a request received by the Professor Lambda
     '''
