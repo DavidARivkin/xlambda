@@ -32,3 +32,8 @@ class XLambdaExceptionExhaustedWarmBatches(Exception):
 class XLambdaExceptionFailedGetMetrics(Exception):
     '''Failed to get CloudWatch metrics for a Lambda function'''
     pass
+
+
+class XLambdaExceptionFailedGetSettings(Exception):
+    '''Failed to get settings about a Lambda function'''
+    pass

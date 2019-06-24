@@ -18,7 +18,7 @@ def validate_request(options: Dict) -> tuple:
     return True, 'Valid request'
 
 
-def get_lambda_metrics(*, function_name: str, region: str) -> List:
+def get_lambda_info(*, function_name: str, region: str) -> List:
     '''Get demand metrics from a given Lamdba functions'''
     now = datetime.datetime.utcnow()
     start_time = now - datetime.timedelta(days=constants.METRICS_DAYS_AGO)
@@ -32,11 +32,18 @@ def get_lambda_metrics(*, function_name: str, region: str) -> List:
         max_datapoints=constants.METRICS_MAX_DATAPOINTS,
     )
 
-    if status == 200:
-        return metrics
-
-    else:
+    if status != 200:
         raise exc.XLambdaExceptionFailedGetMetrics()
+
+    status, settings = get_settings(
+        function_name=function_name,
+        region=region,
+    )
+
+    if status != 200:
+        raise exc.XLambdaExceptionFailedGetSettings()
+
+    return metrics, settings
 
 
 def get_metric_data(
@@ -97,3 +104,40 @@ def stringify_metrics_datetime(*, metrics: List) -> List:
         metric['timestamp'].strftime('%Y-%m-%d %H:%M:%S'): metric['value']
         for metric in metrics
     }
+
+
+def get_settings(*, function_name: str, region: str) -> Dict:
+    '''Get Lambda settings'''
+
+
+def format_settings(*, settings: Dict) -> Dict:
+    '''Format Lambda settings'''
+    return {
+        'runtime': normalize_runtime(settings['runtime']),
+        'inside_vpc': True if 'vpc' in settings else False,
+    }
+
+
+def normalize_runtime(*, aws_runtime: str) -> str:
+    '''Normalize the runtimes'''
+    runtime = aws_runtime.lower()
+
+    if 'python' in runtime:
+        return 'python'
+
+    if 'java' in runtime:
+        return 'java'
+
+    if 'node' in runtime:
+        return 'node'
+
+    if 'go' in runtime:
+        return 'go'
+
+    if 'net' in runtime:
+        return 'dot-net'
+
+    if 'c#' in runtime:
+        return 'c-sharp'
+
+    return 'unknown'

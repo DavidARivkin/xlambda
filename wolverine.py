@@ -23,7 +23,7 @@ def handler(event: Dict, context: Dict) -> Dict:
 
         return response.build(
             status=200,
-            data=result.get('data'),
+            data=result,
         )
 
     except Exception as error:
@@ -49,11 +49,12 @@ def execute(*, options):
     if not is_request_valid:
         raise exc.XLambdaExceptionInvalidRequest(validation_msg)
 
-    metrics = utils.get_lambda_metrics(
+    metrics, settings = utils.get_lambda_info(
         function_name=options['name'],
         region=options['region'],
     )
 
     options['metrics'] = utils.stringify_metrics_datetime(metrics=metrics)
+    options['settings'] = utils.format_settings(settings)
 
     return options

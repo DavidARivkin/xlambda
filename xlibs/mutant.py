@@ -1,5 +1,5 @@
 '''Mutant Classes'''
-from typing import List
+from typing import Bool, Dict, List
 
 from xlibs import async_lambda
 from xlibs.utils import get_function_name
@@ -83,6 +83,15 @@ class Cyclops(Mutant):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._name = 'cyclops'
+        self._target = {
+            'function_name': None,
+            'region': None,
+        }
+        self._results = []
+
+    @property
+    def check_target(self):
+        return self._results
 
     def burn(self, functions_demand: List) -> List:
         '''Warm up a list of Lambdas'''
@@ -101,3 +110,26 @@ class Cyclops(Mutant):
             for payload in response
             if payload['status'] == 200
         ]
+
+    def target(self, target: str, settings: Dict) -> Bool:
+        '''Set a Lambda as target for Cyclops'''
+        self._target['function_name'] = target['name']
+        self._target['region'] = target['region']
+        self._target['startup_time'] = self.estimate_startup(settings=settings)
+
+        return self
+
+    def laser(self, intensity: int) -> Dict:
+        '''Activate Cyclops laser on the target set'''
+        self._results = []
+
+        pass
+
+    def estimate_startup(self, settings: Dict) -> int:
+        '''Estimate startup time of the function in milliseconds
+        '''
+        pass
+
+    def calculate_delay(self, i: int) -> int:
+        '''How long (milliseconds) the Lambda should wait before terminating'''
+        pass
