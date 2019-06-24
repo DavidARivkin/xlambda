@@ -1,63 +1,64 @@
 import asyncio
-from aiohttp import ClientSession
-from typing import Dict
+import json
+import os
+from typing import Dict, List
+import urllib
 
-from botocore.auth import SigV4Auth
-from botocore.awsrequest import AWSRequest
-from botocore.session import Session
+import aiohttp
+from botocore import session, awsrequest, auth
 
-from urllib.parse import urlparse
-from os.path import join
-from json import dumps
-
-
-creds = Session().get_credentials()
-LAMBDA_ENDPOINT_BASE = 'https://lambda.{region}.amazonaws.com/2015-03-31/functions'  # NOQA
+from xlibs import constants
 
 
-def create_signed_headers(*, url: str, payload: Dict):
+AWS_CREDENTIALS = session.Session().get_credentials()
+
+
+def sign_headers(*, url: str, payload: Dict):
     '''Sign AWS API request headers'''
-    host_segments = urlparse(url).netloc.split('.')
+    host_segments = urllib.parse.urlparse(url).netloc.split('.')
     service = host_segments[0]
     region = host_segments[1]
 
-    request = AWSRequest(
+    request = awsrequest.AWSRequest(
         method='POST',
         url=url,
-        data=dumps(payload),
+        data=json.dumps(payload),
     )
 
-    SigV4Auth(creds, service, region).add_auth(request)
+    auth.SigV4Auth(AWS_CREDENTIALS, service, region).add_auth(request)
 
     return dict(request.headers.items())
 
 
 async def invoke(*, url: str, payload: Dict, session):
-    signed_headers = create_signed_headers(url=url, payload=payload)
+    '''Invoke a Lambda function'''
+    signed_headers = sign_headers(url=url, payload=payload)
 
-    async with session.post(url,
-                            json=payload,
-                            headers=signed_headers) as response:
+    async with session.post(url, json=payload, headers=signed_headers) \
+            as response:
         return await response.json()
 
 
-def generate_invocations(*, requests, base_url, session):
+def generate_invocations(*, requests: List, base_url: str, session):
     for request in requests:
-        url = join(base_url, request['function_name'], 'invocations')
+        url = os.path.join(base_url, request['function_name'], 'invocations')
+
         yield invoke(url=url, payload=request['payload'], session=session)
 
 
-def invoke_all(*, requests, region='us-east-1'):
-    base_url = LAMBDA_ENDPOINT_BASE.format(region=region)
+def invoke_all(*, requests: List, region: str = 'us-east-1'):
+    base_url = constants.LAMBDA_ENDPOINT.format(region=region)
 
-    async def wrapped():
-        async with ClientSession(raise_for_status=True) as session:
-                invocations = generate_invocations(
-                    requests=requests,
-                    base_url=base_url,
-                    session=session,
-                )
+    async def wrapper():
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            invocations = generate_invocations(
+                requests=requests,
+                base_url=base_url,
+                session=session,
+            )
 
-                return await asyncio.gather(*invocations)
+            return await asyncio.gather(*invocations)
 
-    return asyncio.get_event_loop().run_until_complete(wrapped())
+    loop = asyncio.get_event_loop()
+
+    return loop.run_until_complete(wrapper())
