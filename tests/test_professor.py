@@ -5,8 +5,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 import professor
 from xlibs import exc
+from xlibs.utils import validate_request
 from xlibs.professor import constants, start_warming
-from xlibs.professor.utils import execute, validate_request, get_config
+from xlibs.professor.utils import get_config
 from xlibs.professor.config import XLambdaConfig
 
 
@@ -40,15 +41,15 @@ class CustomMock():
 class TestProfessor(unittest.TestCase):
     '''Test the Professor Lambda'''
 
-    @patch('professor.utils')
-    def test_handler(self, utils):
+    @patch('professor.execute')
+    def test_handler(self, execute):
         options = {'Mutants': 'X-Men'}
         context = {'House': 'of Gifted Youngsters'}
 
         response = professor.handler(options, context)
 
-        utils.execute.assert_called()
-        utils.execute.assert_called_with(
+        execute.assert_called()
+        execute.assert_called_with(
             options=options,
         )
 
@@ -66,6 +67,7 @@ class TestProfessorUtils(unittest.TestCase):
         '''Test request validation routine'''
         is_request_valid, validation_msg = validate_request(
             options={arg: 'whatever' for arg in self.required},
+            required_args=constants.REQUIRED_ARGS,
         )
 
         self.assertTrue(is_request_valid)
@@ -74,6 +76,7 @@ class TestProfessorUtils(unittest.TestCase):
         '''Test validation routine with a broken request'''
         is_request_valid, validation_msg = validate_request(
             options={arg: 'whatever' for arg in self.required[:-1]},
+            required_args=constants.REQUIRED_ARGS,
         )
 
         self.assertFalse(is_request_valid)
@@ -83,10 +86,10 @@ class TestProfessorUtils(unittest.TestCase):
         'xlibs.professor.utils.validate_request',
         new_callable=CustomMock.validate_request_return_true)
     @patch('xlibs.professor.utils.get_config')
-    @patch('xlibs.professor.utils.start_warming')
+    @patch('xlibs.professor.start_warming.run')
     def test_execute_valid_request(
             self,
-            start_warming,
+            run,
             get_config,
             validate_request,
             ):
@@ -96,7 +99,7 @@ class TestProfessorUtils(unittest.TestCase):
             'config_obj_name': 'x-lambda.yml',
         }
 
-        execute(options=options)
+        professor.execute(options=options)
 
         get_config.assert_called()
         get_config.assert_called_with(
@@ -104,7 +107,7 @@ class TestProfessorUtils(unittest.TestCase):
             config_obj_name=options['config_obj_name'],
         )
 
-        start_warming.run.assert_called()
+        run.assert_called()
 
     @patch(
         'xlibs.professor.utils.get_object_from_s3',
@@ -120,7 +123,7 @@ class TestProfessorUtils(unittest.TestCase):
         '''Test execution of a valid request'''
         self.assertRaises(
             exc.XLambdaExceptionInvalidRequest,
-            execute,
+            professor.execute,
             options={},
         )
 
