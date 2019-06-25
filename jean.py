@@ -4,7 +4,6 @@ from typing import Dict
 
 from xlibs import exc, response
 from xlibs.jean import constants, utils
-from xlibs.mutant import Jean
 
 
 logger = logging.getLogger()
@@ -51,4 +50,9 @@ def execute(*, options: Dict) -> Dict:
     if not is_request_valid:
         raise exc.XLambdaExceptionInvalidRequest(validation_msg)
 
-    pass
+    options['forecast'] = utils.forecasting(
+        metrics=options['metrics'],
+        timeframe=options['timeframe'],
+    )
+
+    return options

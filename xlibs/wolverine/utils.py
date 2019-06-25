@@ -55,8 +55,8 @@ def get_metric_data(
         function_name: str,
         region_name: str,
         period: int,
-        start_time: int,
-        end_time: int,
+        start_time: datetime.datetime,
+        end_time: datetime.datetime,
         max_datapoints: int,
         ) -> Dict:
     '''Retrieve metric data from CloudWatch API'''
