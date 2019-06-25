@@ -3,7 +3,7 @@ import traceback
 from typing import Dict
 
 from xlibs import exc, response
-from xlibs.wolverine import utils
+from xlibs.wolverine import constants, utils
 
 
 logger = logging.getLogger()
@@ -44,6 +44,7 @@ def execute(*, options):
     '''Execute a request received by the Wolverine Lambda'''
     is_request_valid, validation_msg = utils.validate_request(
         options=options,
+        required_args=constants.REQUIRED_ARGS,
     )
 
     if not is_request_valid:

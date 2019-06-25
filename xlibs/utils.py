@@ -5,10 +5,10 @@ import boto3
 from xlibs import constants
 
 
-def validate_request(options: Dict) -> tuple:
+def validate_request(options: Dict, required_args: List) -> tuple:
     '''Validate a request received by a Lambda function'''
-    if not all([arg in options.keys() for arg in constants.REQUIRED_ARGS]):
-        required = '", "'.join(constants.REQUIRED_ARGS)
+    if not all([arg in options.keys() for arg in required_args]):
+        required = '", "'.join(required_args)
         return False, f'Missing required option arguments: "{required}"'
 
     return True, 'Valid request'

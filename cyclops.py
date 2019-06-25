@@ -3,7 +3,7 @@ import traceback
 from typing import Dict
 
 from xlibs import exc, response
-from xlibs.cyclops import utils
+from xlibs.cyclops import constants, utils
 from xlibs.mutant import Cyclops
 
 
@@ -45,6 +45,7 @@ def execute(*, options: Dict) -> Dict:
     '''Execute a request received by the Cyclops Lambda'''
     is_request_valid, validation_msg = utils.validate_request(
         options=options,
+        required_args=constants.REQUIRED_ARGS,
     )
 
     if not is_request_valid:

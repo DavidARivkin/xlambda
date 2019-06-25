@@ -1,5 +1,5 @@
 '''Mutant Classes'''
-from typing import Bool, Dict, List
+from typing import Dict, List
 
 from xlibs import async_lambda
 from xlibs.utils import get_function_name
@@ -111,7 +111,7 @@ class Cyclops(Mutant):
             if payload['status'] == 200
         ]
 
-    def target(self, target: str, settings: Dict) -> Bool:
+    def target(self, target: str, settings: Dict) -> bool:
         '''Set a Lambda as target for Cyclops'''
         self._target['function_name'] = target['name']
         self._target['region'] = target['region']

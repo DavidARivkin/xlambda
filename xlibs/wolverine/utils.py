@@ -1,5 +1,6 @@
 '''Utility functions for the Wolverine Lambda'''
 import datetime
+import math
 from typing import Dict, List
 
 import boto3
@@ -127,6 +128,18 @@ def format_settings(*, settings: Dict) -> Dict:
     }
 
 
+def estimate_startup_time(*, runtime: str, memory: int) -> int:
+    '''Estimate how long it should take for a function to cold start'''
+    coeff = constants.STARTUP_TIME_COEFFICIENT.get(runtime)
+
+    if not coeff:
+        return constants.STARTUP_TIME_COEFFICIENT['default']['startup_time']
+
+    memory_ln = math.log(int(memory))
+
+    return math.ceil(math.exp(coeff['intercept'] + coeff['x'] * memory_ln))
+
+
 def normalize_runtime(*, aws_runtime: str) -> str:
     '''Normalize the runtimes'''
     runtime = aws_runtime.lower()
@@ -138,7 +151,7 @@ def normalize_runtime(*, aws_runtime: str) -> str:
         return 'java'
 
     if 'node' in runtime:
-        return 'node'
+        return 'nodejs'
 
     if 'go' in runtime:
         return 'go'
