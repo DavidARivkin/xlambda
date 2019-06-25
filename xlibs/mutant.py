@@ -1,5 +1,5 @@
 '''Mutant Classes'''
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from xlibs import async_lambda
 from xlibs.utils import get_function_name
@@ -20,11 +20,14 @@ class Mutant():
 
         return self._function_name
 
-    def execute(self, requests: List) -> List:
+    def execute(self, requests: List, region: Optional[str] = None) -> List:
         '''Invoke a Mutant Lambda'''
+        if not region:
+            region = constants.REGION
+
         return async_lambda.invoke_all(
             requests=requests,
-            region=constants.REGION,
+            region=region,
         )
 
 
@@ -83,14 +86,12 @@ class Cyclops(Mutant):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._name = 'cyclops'
-        self._target = {
-            'function_name': None,
-            'region': None,
-        }
-        self._results = []
+        self._target = None
+        self._results = None
+        self._containers = None
 
     @property
-    def check_target(self):
+    def results(self):
         return self._results
 
     def burn(self, functions_demand: List) -> List:
@@ -111,25 +112,48 @@ class Cyclops(Mutant):
             if payload['status'] == 200
         ]
 
-    def target(self, target: str, settings: Dict) -> bool:
-        '''Set a Lambda as target for Cyclops'''
-        self._target['function_name'] = target['name']
-        self._target['region'] = target['region']
-        self._target['startup_time'] = self.estimate_startup(settings=settings)
+    def aim(self, target: Dict):
+        '''Set a Lambda and its settings as target for the Cyclops laser'''
+        self._target = CyclopsTarget(**target)
+
+        self._containers = max(self._target.forecast)
 
         return self
 
-    def laser(self, intensity: int) -> Dict:
-        '''Activate Cyclops laser on the target set'''
+    def fire(self):
+        '''Activate Cyclops laser on the target Lambda'''
         self._results = []
 
+        requests = [
+            {
+                'function_name': self.target.name,
+                'payload': self.target.payload,
+            }
+            for i in range(0, self._containers)
+        ]
+
+        self._results = self.execute(
+            requests=requests,
+            region=self.target.region,
+        )
+
         return self
 
-    def estimate_startup(self, settings: Dict) -> int:
-        '''Estimate startup time of the function in milliseconds
-        '''
-        pass
 
-    def calculate_delay(self, i: int) -> int:
-        '''How long (milliseconds) the Lambda should wait before terminating'''
-        pass
+class CyclopsTarget():
+
+    def __init__(self, name, region, settings, forecast, *args, **kwargs):
+        self.name = name
+        self.region = region
+        self.settings = settings
+        self.forecast = forecast
+
+    @property
+    def payload(self):
+        '''Provide target payload in dictionary format'''
+        return {
+            'xlambda': {
+                'action': 'warm_up',
+                'settings': self.settings,
+            },
+        }

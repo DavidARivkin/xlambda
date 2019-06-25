@@ -55,7 +55,7 @@ def execute(*, options):
         region=options['region'],
     )
 
-    options['metrics'] = utils.stringify_metrics_datetime(metrics=metrics)
-    options['settings'] = utils.format_settings(settings)
+    options['metrics'] = metrics
+    options['settings'] = settings
 
     return options

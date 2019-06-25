@@ -51,10 +51,10 @@ def execute(*, options: Dict) -> Dict:
     if not is_request_valid:
         raise exc.XLambdaExceptionInvalidRequest(validation_msg)
 
-    cyclope = Cyclops()
+    cyclops = Cyclops()
 
-    cyclope.target(target=options).laser(intensity=options['demand'])
+    results = cyclops.aim(target=options).fire().results
 
-    options['warm_results'] = cyclope.check_target
+    options['warm_results'] = results
 
     return options
