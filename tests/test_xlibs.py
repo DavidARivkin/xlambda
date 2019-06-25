@@ -1,8 +1,8 @@
 '''Test xlibs'''
+from typing import Dict
 import unittest
-from unittest.mock import (
-    patch,
-)
+from unittest.mock import patch
+
 from xlibs import constants, mutant, utils
 from xlibs.response import build
 
@@ -115,3 +115,38 @@ class TestMutants(unittest.TestCase):
             requests=requests,
             region=constants.REGION,
         )
+
+    def test_cyclops_container_count(self):
+        '''Test counting of how many containers should be warmed up'''
+        target = {
+            'name': 'Charles-Xavier',
+            'region': 'us-east-1',
+            'settings': {},
+            'forecast': [4, 15, 2],
+            'scaling': None,
+        }
+
+        cyclops = mutant.Cyclops()
+        cyclops.aim(target=target)
+
+        cyclops._target.scaling = get_scaling(1, 10, 50)
+        self.assertEqual(cyclops.containers_to_warm, 10)
+
+        cyclops._target.scaling = get_scaling(1, 20, 50)
+        self.assertEqual(cyclops.containers_to_warm, 15)
+
+        cyclops._target.scaling = get_scaling(1, 20, 8)
+        self.assertEqual(cyclops.containers_to_warm, 8)
+
+
+def get_scaling(
+        min_containers: int = 1,
+        max_containers: int = 10,
+        max_concurrency: int = 50,
+        ) -> Dict:
+    return dict(
+        zip(
+            ['min_containers', 'max_containers', 'max_concurrency'],
+            [min_containers, max_containers, max_concurrency],
+        )
+    )

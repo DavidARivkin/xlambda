@@ -1,7 +1,7 @@
 '''Utility functions for the Wolverine Lambda'''
 import datetime
 import math
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import boto3
 
@@ -139,7 +139,7 @@ def estimate_startup_time(
         *,
         runtime: str,
         memory_size: int,
-        is_in_vpc: bool,
+        is_in_vpc: Optional[bool] = False,
         **kwargs,
         ) -> int:
     '''Estimate how long it should take for a function to cold start'''

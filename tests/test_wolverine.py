@@ -45,9 +45,9 @@ class TestWolverineUtils(unittest.TestCase):
         }
 
         for runtime, estimates in test_cases.items():
-            for memory, expected in estimates.items():
+            for memory_size, expected in estimates.items():
                 estimate = utils.estimate_startup_time(
                     runtime=runtime,
-                    memory=int(memory),
+                    memory_size=int(memory_size),
                 )
                 self.assertEqual(estimate, expected)

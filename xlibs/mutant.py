@@ -88,11 +88,25 @@ class Cyclops(Mutant):
         self._name = 'cyclops'
         self._target = None
         self._results = None
-        self._containers = None
 
     @property
     def results(self):
         return self._results
+
+    @property
+    def containers_to_warm(self):
+        '''Calculate number of containers to warm up'''
+        forecast = max(self._target.forecast)
+        min_containers = self._target.scaling['min_containers']
+        max_containers = min(
+            self._target.scaling['max_containers'],
+            self._target.scaling['max_concurrency'],
+        )
+
+        return min(
+            max(forecast, min_containers),
+            max_containers,
+        )
 
     def burn(self, functions_demand: List) -> List:
         '''Warm up a list of Lambdas'''
@@ -116,8 +130,6 @@ class Cyclops(Mutant):
         '''Set a Lambda and its settings as target for the Cyclops laser'''
         self._target = CyclopsTarget(**target)
 
-        self._containers = max(self._target.forecast)
-
         return self
 
     def fire(self):
@@ -129,7 +141,7 @@ class Cyclops(Mutant):
                 'function_name': self.target.name,
                 'payload': self.target.payload,
             }
-            for i in range(0, self._containers)
+            for i in range(0, self.containers_to_warm)
         ]
 
         self._results = self.execute(
@@ -142,11 +154,21 @@ class Cyclops(Mutant):
 
 class CyclopsTarget():
 
-    def __init__(self, name, region, settings, forecast, *args, **kwargs):
+    def __init__(
+            self,
+            name: str,
+            region: str,
+            settings: Dict,
+            forecast: List,
+            scaling: Dict,
+            *args,
+            **kwargs,
+            ):
         self.name = name
         self.region = region
         self.settings = settings
         self.forecast = forecast
+        self.scaling = scaling
 
     @property
     def payload(self):
