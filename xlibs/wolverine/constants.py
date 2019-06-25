@@ -11,8 +11,8 @@ METRICS_MAX_DATAPOINTS = 1000
 METRICS_TIME_PERIOD = 300  # Seconds
 METRICS_DAYS_AGO = 1
 
-# Startup time sensitivity
-STARTUP_TIME_COEFFICIENT = {
+# Startup time sensitivity coefficients
+STARTUP_TIME = {
     'csharp': {
         'intercept': 11.66002128,
         'x': -0.646476376,
@@ -30,6 +30,7 @@ STARTUP_TIME_COEFFICIENT = {
         'x': -0.600820477,
     },
     'default': {
-        'startup_time': 10,
+        'startup_time': 10000,
+        'vpc_overhead': 2500,
     },
 }

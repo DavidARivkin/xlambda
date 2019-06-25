@@ -34,7 +34,7 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     )
 
     if status != 200:
-        raise exc.XLambdaExceptionFailedGetMetrics()
+        raise exc.XLambdaExceptionGetMetricsFailed()
 
     status, settings = get_settings(
         function_name=function_name,
@@ -42,9 +42,12 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     )
 
     if status != 200:
-        raise exc.XLambdaExceptionFailedGetSettings()
+        raise exc.XLambdaExceptionGetSettingsFailed()
 
-    return metrics, settings
+    return (
+        stringify_metrics_datetime(metrics=metrics),
+        format_settings(settings),
+    )
 
 
 def get_metric_data(
@@ -120,24 +123,39 @@ def get_settings(*, function_name: str, region: str) -> Dict:
 
 def format_settings(*, settings: Dict) -> Dict:
     '''Format Lambda settings'''
-    return {
+    formatted = {
         'runtime': normalize_runtime(settings['Runtime']),
-        'memory': settings['MemorySize'],
+        'memory_size': settings['MemorySize'],
         'timeout': settings['Timeout'],
-        'inside_vpc': len(settings['VpcConfig']['VpcId']) > 0,
+        'is_in_vpc': len(settings['VpcConfig']['VpcId']) > 0,
     }
 
+    formatted['startup_time'] = estimate_startup_time(**formatted)
 
-def estimate_startup_time(*, runtime: str, memory: int) -> int:
+    return formatted
+
+
+def estimate_startup_time(
+        *,
+        runtime: str,
+        memory_size: int,
+        is_in_vpc: bool,
+        **kwargs,
+        ) -> int:
     '''Estimate how long it should take for a function to cold start'''
-    coeff = constants.STARTUP_TIME_COEFFICIENT.get(runtime)
+    coeff = constants.STARTUP_TIME.get(runtime)
 
     if not coeff:
-        return constants.STARTUP_TIME_COEFFICIENT['default']['startup_time']
+        return constants.STARTUP_TIME['default']['startup_time']
 
-    memory_ln = math.log(int(memory))
+    memory_ln = math.log(int(memory_size))
 
-    return math.ceil(math.exp(coeff['intercept'] + coeff['x'] * memory_ln))
+    estimate = math.ceil(math.exp(coeff['intercept'] + coeff['x'] * memory_ln))
+
+    if is_in_vpc:
+        estimate += constants.STARTUP_TIME['default']['vpc_overhead']
+
+    return estimate
 
 
 def normalize_runtime(*, aws_runtime: str) -> str:
