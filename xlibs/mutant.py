@@ -123,7 +123,7 @@ class Cyclops(Mutant):
         '''Activate Cyclops laser on the target set'''
         self._results = []
 
-        pass
+        return self
 
     def estimate_startup(self, settings: Dict) -> int:
         '''Estimate startup time of the function in milliseconds

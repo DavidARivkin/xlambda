@@ -108,13 +108,22 @@ def stringify_metrics_datetime(*, metrics: List) -> List:
 
 def get_settings(*, function_name: str, region: str) -> Dict:
     '''Get Lambda settings'''
+    client = boto3.client('lambda', region_name=region)
+
+    settings = client.get_function_configuration(
+        FunctionName=function_name,
+    )
+
+    return settings
 
 
 def format_settings(*, settings: Dict) -> Dict:
     '''Format Lambda settings'''
     return {
-        'runtime': normalize_runtime(settings['runtime']),
-        'inside_vpc': True if 'vpc' in settings else False,
+        'runtime': normalize_runtime(settings['Runtime']),
+        'memory': settings['MemorySize'],
+        'timeout': settings['Timeout'],
+        'inside_vpc': len(settings['VpcConfig']['VpcId']) > 0,
     }
 
 
@@ -134,10 +143,10 @@ def normalize_runtime(*, aws_runtime: str) -> str:
     if 'go' in runtime:
         return 'go'
 
-    if 'net' in runtime:
-        return 'dot-net'
+    if 'dotnet' in runtime:
+        return 'dotnet'
 
-    if 'c#' in runtime:
-        return 'c-sharp'
+    if 'ruby' in runtime:
+        return 'ruby'
 
     return 'unknown'
