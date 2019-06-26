@@ -51,6 +51,11 @@ Create a custom YAML file following this pattern:
 
 _PENDING: Detail YAML template here..._
 
+### Adjust your Lambda functions
+
+Please follow these instructions (**PENDING LINK**) to adapt your Lambda function handlers to respond appropriatelly to warming requests.
+
+
 ### Deployment
 
 1. Create an S3 bucket (or use an existing one) and upload your YAML configuration options
@@ -201,15 +206,15 @@ Lambda executions are most often short-lived (few dozen or hundred milliseconds)
 
 Our awesome [dev team at Dashbird](https://dashbird.io/team/) is working on a custom API endpoint to provide the same metrics for any Lambda function, regardless of having a reserved concurrency setting in place. We’ll be using the start and end time of each Lambda invocation present in CloudWatch log streams as a proxy to count the number of containers alive at any point in time.
 
-There are [some caveats](https://codeburst.io/why-shouldnt-you-trust-system-clocks-72a82a41df93) when it comes to relying on system clock times in a distributed infrastructure such as the Lambda platform, though. I trust AWS has the best practices in place when it comes to calculating the execution time of a particualr invocation, but the start and end times from different invocations might not be in perfect sync if they’re running on different machines. That’s something we need to take into account and investigate better before releasing this API.
+There are [some caveats](https://codeburst.io/why-shouldnt-you-trust-system-clocks-72a82a41df93) when it comes to relying on system clock times in a distributed infrastructure such as the Lambda platform, though. We trust AWS has the best practices in place when it comes to calculating the execution time of a particular invocation, but the start and end times from different invocations might not be in perfect sync if they’re running on different machines. That’s something we need to take into account and investigate better before releasing this API.
 
 ### Scalability
 
-As it is currently architected, X-Lambda has limitations to scale the warming process, mainly due to the AWS CloudWatch and Lambda APIs on which we rely have their limits. The GetMetricData, for example, accepts up to 50 RPS and returns up to 90,000 data points per minute. When retrieving the timeseries metrics to support forecasting, if you have too many functions to be warmed up at the same time, these APIs can throttle our requests and disrupt the overall process. That’s why we suggest it’s safer to schedule X-Lambda to warm a maximum of 50 Lambda functions at a time.
+As it is currently architected, X-Lambda has limitations to scale the warming process, mainly due to limits in the AWS CloudWatch and Lambda APIs on which we rely. The GetMetricData, for example, accepts up to 50 RPS and returns up to 90,000 data points per minute. When retrieving the timeseries metrics to support forecasting, if you have too many functions to be warmed up at the same time, these APIs can throttle our requests and disrupt the overall process. That’s why we suggest it’s safer to schedule X-Lambda to warm a maximum of 50 Lambda functions at a time.
 
-Our Lambdas (Professor, Wolverine, Jean and Cyclops) work coupled to each other and we don’t have enough logic to rate limit all of AWS API requests. Nevertheless, rate limiting is implemented, to some extent, it in this alpha release. For example: you can set a global maximum concurrency limit for invoking your Lambda functions. The Cyclops function will adjust to it when firing the warming requests. However, if a function happens to need more containers than the concurrency limit imposed, X-Lambda won’t be able to limit the entire set of containers, restricting itself to warming up to the concurrency limit set.
+Our Lambdas (Professor, Wolverine, Jean and Cyclops) work coupled to each other and we don’t have enough logic to rate limit all of AWS API requests. Nevertheless, rate limiting is implemented to some extent in this alpha release. For example: you can set a global maximum concurrency limit for invoking your Lambda functions. The Cyclops function will adjust to it when firing the warming requests. However, if a function happens to need more containers than the concurrency limit imposed, X-Lambda won’t be able to limit the entire set of containers, restricting itself to warming up to the concurrency limit set.
 
-In future versions, we will extend to a more robust architecture, decoupling the Lambdas and relying on queuing to make X-Lambda really scalable.
+In future versions, we will extend to a more robust architecture, decoupling the Lambdas and relying on queuing to make X-Lambda more scalable.
 
 ## Project roadmap
 
