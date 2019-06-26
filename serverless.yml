@@ -7,10 +7,8 @@ provider:
     runtime: python3.7
     stage: dev
     region: us-east-1
-    memorySize: 1024
+    memorySize: 512
     timeout: 900
-    # deploymentBucket:
-    #     name: sls.deploys.${self:service}
     versionFunctions: false
     runtime: python3.7
     environment:
@@ -29,7 +27,7 @@ functions:
                 name: XLambdaSchedule
                 description: Schedule the execution of the X-Lambda warming process.
                 rate: rate(15 minutes)
-                enabled: false
+                enabled: true
                 input:
                     's3_bucket': 'XLambdaBucket'
                     'config_obj_name': 'XLambdaConfig.yml'
