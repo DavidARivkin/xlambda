@@ -15,7 +15,7 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 
 [Dashbird.io](https://dashbird.io): the leading serverless monitoring platform in the market with +250,000 Lambda functions monitored.
 
-[![Dashbird Logo](https://github.com/dashbird/xlambda/raw/master/images/dashbird-logo.jpg)](https://dashbird.io)
+[![Dashbird Logo](https://github.com/dashbird/xlambda/raw/master/images/dashbird-logo.png)](https://dashbird.io)
 
 ### Special kudos to
 
