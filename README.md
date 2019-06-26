@@ -37,6 +37,8 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 
 ## Quick Start
 
+> **WARNING**: this is an alpha version (more on "[What to expect and current limitations](https://github.com/dashbird/xlambda#what-to-expect-and-current-limitations)"). It is not recommended to use it in a mission critical production infrastructure.
+
 ### Installation
 
 1. Make sure your system meets the requirements above
@@ -56,6 +58,14 @@ _PENDING: Detail YAML template here..._
   * In which AWS region you would like to run X-Lambda (under `provider.region`)
   * The input S3 Bucket and Object names according to the ones you created in the previous step, (under `functions.professor.events.schedule`)
 3. Run the serverless template: `serverless deploy`
+
+### Contribute
+
+Contributions from the community are very welcome. Please share ideas or point out bugs in the [Github issues](https://github.com/dashbird/xlambda/issues) area.
+
+If you would like to contribute with code, talk to us about your ideas: <xlambda@dashbird.io>. Then submit a pull request and we will promptly respond accordingly.
+
+Run unit-tests locally with `python -m unittest discover tests` (`cd` to the the project's root path).
 
 # About X-Lambda
 
