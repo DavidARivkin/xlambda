@@ -20,14 +20,19 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 ### Special kudos to
 
 [StatsModels](https://www.statsmodels.org): easy to use timeseries analysis models
+
 [Serverless](https://serverless.com/framework/): seamless deployment of X-Lambda on AWS
+
 [aiohttp](https://aiohttp.readthedocs.io): making concurrent HTTP requests a piece of cake
 
 ## Requirements
 
 [AWS Account](https://aws.amazon.com)
+
 [Python +3.7](https://www.python.org/downloads/)
+
 [NodeJS +8](https://nodejs.org)
+
 [Serverless +1.45](https://serverless.com/framework/)
 
 ## Quick Start
@@ -42,14 +47,14 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 
 Create a custom YAML file following this pattern:
 
-_Detail YAML template here..._
+_PENDING: Detail YAML template here..._
 
 ### Deployment
 
-1. Create an S3 bucket to hold your YAML configuration options
-2. In the `serverless.yml` template
-..* Customize in which AWS region you would like to run X-Lambda
-..* Under `functions.professor.events.schedule`, customize the input S3 Bucket and Object names according to the ones you created in  the previous step
+1. Create an S3 bucket (or use an existing one) and upload your YAML configuration options
+2. In the `serverless.yml` template, customize:
+  * In which AWS region you would like to run X-Lambda (under `provider.region`)
+  * The input S3 Bucket and Object names according to the ones you created in the previous step, (under `functions.professor.events.schedule`)
 3. Run the serverless template: `serverless deploy`
 
 # About X-Lambda
@@ -60,7 +65,7 @@ Four Lambda functions take care of everything:
 
 ### Professor
 
-![Professor Xavier](https://github.com/dashbird/xlambda/raw/master/images/professor.jpg)
+![Professor Xavier](https://github.com/dashbird/xlambda/raw/master/images/professor.PNG)
 
 Of course, we wouldn’t let Professor Xavier out of this mission. This function takes care of controlling the entire warming process, coordinating the other Lambdas.
 
@@ -76,7 +81,7 @@ We do not parallelize anything (actually processing things in parallel on multip
 
 ### Wolverine
 
-![Wolverine](https://github.com/dashbird/xlambda/raw/master/images/wolverine.jpg)
+![Wolverine](https://github.com/dashbird/xlambda/raw/master/images/wolverine.PNG)
 
 Logan will gather all the information we need so that the other Lambdas can accomplish their tasks on a timely and precise manner.
 
@@ -91,7 +96,7 @@ Wolverine is then charged with supplying every data point needed by our warming 
 
 ### Jean
 
-![Jean Grey](https://github.com/dashbird/xlambda/raw/master/images/jean.jpg)
+![Jean Grey](https://github.com/dashbird/xlambda/raw/master/images/jean.PNG)
 
 Based on the Lambda concurrent invocation metrics, the _Marvel Girl_ forecasts how many containers will be needed in the near-term.
 
@@ -101,7 +106,7 @@ Currently we use historic concurrent requests provided by CloudWatch, with a 5-m
 
 ### Cyclops
 
-![Cyclops](https://github.com/dashbird/xlambda/raw/master/images/cyclops.jpg)
+![Cyclops](https://github.com/dashbird/xlambda/raw/master/images/cyclops.PNG)
 
 Scott Summers is responsible for adjusting its laser power and firing up the right number of containers for a given Lambda function.
 
@@ -123,11 +128,15 @@ The forecasting of Lambda containers demand still don’t have a feedback loop t
 
 ### Runtime
 
+![Python Logo](https://github.com/dashbird/xlambda/raw/master/images/python-logo.png)
+
 X-Lambda is implemented in Python, version 3.7. It is hands down a very good option for any project relying on statistical packages. Since using statistical and machine learning analysis is at the core of our vision for X-Lambda development, Python was our go-to choice.
 
 ### Warming dynamics
 
-from a naive standpoint, warming up a certain number of containers is piece of cake: just fire up a bunch invocations concurrently and _voilá_! Right? Well, bottom line it is, but there are some caveats along the way.
+![Fire](https://github.com/dashbird/xlambda/raw/master/images/fire.png)
+
+From a naive standpoint, warming up a certain number of containers is piece of cake: just fire up a bunch invocations concurrently and _voilá_! Right? Well, bottom line it is, but there are some caveats along the way.
 
 Basically, we need to make sure that container spinned up during the warming process will only terminate its execution **_after_** the last warming request is fired, otherwise we will be reusing containers, not actually warming them up.
 
@@ -156,6 +165,8 @@ For now, we thought it would be enough to just make function containers sleep si
 
 ### Forecasting
 
+![StatsModels Forecast](https://github.com/dashbird/xlambda/raw/master/images/statsmodels-forecast.png)
+
 There are multiple approaches to timeseries forecasting, each having its pros and cons, and more appropriate to one or another circumstance. We don’t expect X-Lambda users to be data scientists, or even if they are, to have the time for customizing prediction models for each Lambda function. Thus, we needed a generally applicable approach and settled with the [Simple Exponential Smoothing](https://en.wikipedia.org/wiki/Exponential_smoothing) (SES), using the [StatsModels](https://github.com/statsmodels/statsmodels) library implementation.
 
 SES is simple enough to apply to virtually any timeseries. It has only one hyperparameter (_alpha_) which balances how much weight is given to recent and old observations, making it very straightforward to optimize. By default, recent observations are given more importance than older ones in the forecasting calculations. We find this particularly important to enable X-Lambda to quickly adapt its forecasting to peaks and sudden shifts in container demand.
@@ -165,6 +176,8 @@ We think that Double or Triple Exponential Smoothing aren’t suitable to our us
 X-Lambda is open though, so we invite you to play with other options (check [StatsModels documentation on timeseries analysis](https://www.statsmodels.org/stable/tsa.html)) and see whether you can beat the SES forecasting accuracy. You will want to play with the Jean function, more precisely [this script](https://github.com/dashbird/xlambda/blob/master/xlibs/jean/utils.py). Please let us know your results, if you ever attempt this.
 
 ### Handling concurrency
+
+![Concurrency](https://github.com/dashbird/xlambda/raw/master/images/concurrency.png)
 
 Although we use the AWS Python SDK - [boto3](https://github.com/boto/boto3) - for some endpoints ([GetMetricData](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html) and [GetFunctionConfiguration](https://docs.aws.amazon.com/lambda/latest/dg/API_GetFunctionConfiguration.html)), we decided not to use it for the [Lambda Invoke](https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html) endpoint. That’s because boto3 is not compatible with asynchronous, non-blocking requests. We would need to use threads in order to invoke functions concurrently, adding some overhead. Instead, we implemented this HTTP endpoint using the [asyncio](https://docs.python.org/3/library/asyncio.html) and [aiohttp](https://github.com/aio-libs/aiohttp) libraries.
 
