@@ -1,0 +1,28 @@
+{
+  "name": "xlambda",
+  "version": "0.1.0",
+  "description": "Use statistical power against cold starts in AWS Lambda functions",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dashbird/xlambda.git"
+  },
+  "author": "Dashbird.io",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dashbird/xlambda/issues"
+  },
+  "homepage": "https://github.com/dashbird/xlambda#readme",
+  "dependencies": {
+    "serverless-python-requirements": "^4.3.0"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^4.3.0"
+  }
+}

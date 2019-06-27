@@ -2,6 +2,30 @@ service: xlambda
 
 frameworkVersion: "=1.45.1"
 
+plugins:
+    - serverless-python-requirements
+
+custom:
+    pythonRequirements:
+        dockerizePip: non-linux
+        usePipenv: false
+        # zip: true
+        slim: true
+        noDeploy:
+            - boto3
+
+package:
+    exclude:
+        - __pycache__/**
+        - bin/**
+        - images/**
+        - lib/**
+        - lib64/**
+        - tests/**
+        - share/**
+        - lambda-startup-time-analysis.xlsx
+        - local.py
+
 provider:
     name: aws
     runtime: python3.7
@@ -10,12 +34,10 @@ provider:
     memorySize: 512
     timeout: 900
     versionFunctions: false
-    runtime: python3.7
     environment:
         STAGE: ${self:provider.stage}
     tags:
         region: ${self:provider.region}
-        runtime: python3.7
 
 functions:
     professor:

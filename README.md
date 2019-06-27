@@ -55,7 +55,6 @@ _PENDING: Detail YAML template here..._
 
 Please follow these instructions (**PENDING LINK**) to adapt your Lambda function handlers to respond appropriatelly to warming requests.
 
-
 ### Deployment
 
 1. Create an S3 bucket (or use an existing one) and upload your YAML configuration options

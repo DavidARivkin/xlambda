@@ -30,3 +30,7 @@ lib64
 pyvenv.cfg
 
 ~*
+
+# Serverless and NodeJS
+.requirements.zip
+node_modules/*
