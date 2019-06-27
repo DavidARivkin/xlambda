@@ -3,6 +3,7 @@ from xlibs.constants import *  # NOQA
 
 
 REQUIRED_ARGS = [
+    'metrics',
     'timeframe',
 ]
 

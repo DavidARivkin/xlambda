@@ -2,6 +2,11 @@ import logging
 import traceback
 from typing import Dict
 
+try:
+    import unzip_requirements  # NOQA
+except ImportError:
+    pass
+
 from xlibs import exc, response
 from xlibs.jean import constants, utils
 

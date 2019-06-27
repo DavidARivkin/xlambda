@@ -2,9 +2,10 @@
 import math
 from typing import List
 
-from xlibs.jean import constants
-
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+
+from xlibs.jean.constants import EXP_SMOOTH_PARAMS
+from xlibs.utils import *  # NOQA
 
 
 def forecasting(*, metrics: List, timeframe: int) -> List:
@@ -12,7 +13,7 @@ def forecasting(*, metrics: List, timeframe: int) -> List:
     data = [metric['value'] for metric in metrics]
 
     model = SimpleExpSmoothing(endog=data)
-    fitted_model = model.fit(**constants.EXP_SMOOTH_PARAMS)
+    fitted_model = model.fit(**EXP_SMOOTH_PARAMS)
 
     forecasts = fitted_model.predict(
         start=len(data),
