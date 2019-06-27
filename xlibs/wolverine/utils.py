@@ -3,20 +3,9 @@ import datetime
 import math
 from typing import Dict, List, Optional
 
-import boto3
-
 from xlibs import exc
-from xlibs.wolverine import constants
-
-
-def validate_request(options: Dict) -> tuple:
-    '''Validate a request received by the Professor Lambda
-    '''
-    if not all([arg in options.keys() for arg in constants.REQUIRED_ARGS]):
-        required = '", "'.join(constants.REQUIRED_ARGS)
-        return False, f'Missing required option arguments: "{required}"'
-
-    return True, 'Valid request'
+from xlibs.utils import *  # NOQA
+from xlibs.wolverine import cloudwatch_wrapper as cloudwatch, constants
 
 
 def get_lambda_info(*, function_name: str, region: str) -> List:
@@ -24,7 +13,7 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     now = datetime.datetime.utcnow()
     start_time = now - datetime.timedelta(days=constants.METRICS_DAYS_AGO)
 
-    status, metrics = get_metric_data(
+    status, metrics = cloudwatch.get_metric_data(
         function_name=function_name,
         region_name=region,
         period=constants.METRICS_TIME_PERIOD,
@@ -36,7 +25,7 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     if status != 200:
         raise exc.XLambdaExceptionGetMetricsFailed()
 
-    status, settings = get_settings(
+    status, settings = cloudwatch.get_settings(
         function_name=function_name,
         region=region,
     )
@@ -46,60 +35,8 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
 
     return (
         stringify_metrics_datetime(metrics=metrics),
-        format_settings(settings),
+        format_settings(settings=settings),
     )
-
-
-def get_metric_data(
-        *,
-        function_name: str,
-        region_name: str,
-        period: int,
-        start_time: datetime.datetime,
-        end_time: datetime.datetime,
-        max_datapoints: int,
-        ) -> Dict:
-    '''Retrieve metric data from CloudWatch API'''
-    client = boto3.client('cloudwatch', region_name=region_name)
-
-    response = client.get_metric_data(
-        MetricDataQueries=[
-            {
-                'Id': 'lambda_metrics',
-                'MetricStat': {
-                    'Metric': {
-                        'Namespace': 'AWS/Lambda',
-                        'MetricName': 'ConcurrentExecutions',
-                        'Dimensions': [
-                            {
-                                'Name': 'FunctionName',
-                                'Value': function_name,
-                            },
-                        ],
-                    },
-                    'Period': period,
-                    'Stat': 'Maximum',
-                },
-                'ReturnData': True,
-            },
-        ],
-        StartTime=start_time,
-        EndTime=end_time,
-        # NextToken='string',
-        ScanBy='TimestampAscending',
-        MaxDatapoints=max_datapoints,
-    )
-
-    status = response['ResponseMetadata']['HTTPStatusCode']
-    metrics = [
-        {
-            'timestamp': response['MetricDataResults'][0]['Timestamps'][i],
-            'value': int(response['MetricDataResults'][0]['Values'][i]),
-        }
-        for i in range(0, len(response['MetricDataResults'][0]['Timestamps']))
-    ]
-
-    return status, metrics
 
 
 def stringify_metrics_datetime(*, metrics: List) -> List:
@@ -110,21 +47,10 @@ def stringify_metrics_datetime(*, metrics: List) -> List:
     }
 
 
-def get_settings(*, function_name: str, region: str) -> Dict:
-    '''Get Lambda settings'''
-    client = boto3.client('lambda', region_name=region)
-
-    settings = client.get_function_configuration(
-        FunctionName=function_name,
-    )
-
-    return settings
-
-
 def format_settings(*, settings: Dict) -> Dict:
     '''Format Lambda settings'''
     formatted = {
-        'runtime': normalize_runtime(settings['Runtime']),
+        'runtime': normalize_runtime(aws_runtime=settings['Runtime']),
         'memory_size': settings['MemorySize'],
         'timeout': settings['Timeout'],
         'is_in_vpc': len(settings['VpcConfig']['VpcId']) > 0,

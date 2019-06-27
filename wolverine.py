@@ -2,8 +2,14 @@ import logging
 import traceback
 from typing import Dict
 
+try:
+    import unzip_requirements  # NOQA
+except ImportError:
+    pass
+
 from xlibs import exc, response
-from xlibs.wolverine import constants, utils
+from xlibs.wolverine import utils
+from xlibs.wolverine.constants import REQUIRED_ARGS
 
 
 logger = logging.getLogger()
@@ -44,7 +50,7 @@ def execute(*, options):
     '''Execute a request received by the Wolverine Lambda'''
     is_request_valid, validation_msg = utils.validate_request(
         options=options,
-        required_args=constants.REQUIRED_ARGS,
+        required_args=REQUIRED_ARGS,
     )
 
     if not is_request_valid:

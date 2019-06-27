@@ -7,9 +7,16 @@ REQUIRED_ARGS = [
     'region',
 ]
 
+# Parameters to gather Lambda metrics from CloudWatch
 METRICS_MAX_DATAPOINTS = 1000
 METRICS_TIME_PERIOD = 300  # Seconds
-METRICS_DAYS_AGO = 1
+METRICS_DAYS_AGO = 3
+
+if METRICS_DAYS_AGO * 3600 / METRICS_TIME_PERIOD * 24 > METRICS_MAX_DATAPOINTS:
+    raise ValueError(
+        'The value of METRICS_DAYS_AGO * 3600 / METRICS_TIME_PERIOD * 24 must '
+        'be lower than the value of METRICS_MAX_DATAPOINTS.'
+    )
 
 # Startup time sensitivity coefficients
 STARTUP_TIME = {
@@ -31,6 +38,6 @@ STARTUP_TIME = {
     },
     'default': {
         'startup_time': 10000,
-        'vpc_overhead': 2500,
+        'vpc_overhead': 8000,  # Milliseconds
     },
 }
