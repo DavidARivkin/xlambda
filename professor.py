@@ -3,7 +3,7 @@ import traceback
 from typing import Dict
 
 from xlibs import response, exc
-from xlibs.professor import constants, start_warming, utils
+from xlibs.professor import action_mapper, constants, utils
 
 
 logger = logging.getLogger()
@@ -21,15 +21,13 @@ def handler(event: Dict, context: Dict) -> Dict:
 
         return response.build(
             status=200,
-            msg=result.get('msg'),
-            data=result.get('data'),
-            original_request=event,
+            data=result,
         )
 
     except Exception as error:
         logger.exception(error)
 
-        response.build(
+        return response.build(
             status=500,
             msg='Oops, something went wrong!',
             error={
@@ -53,11 +51,10 @@ def execute(*, options: Dict) -> Dict:
         raise exc.XLambdaExceptionInvalidRequest(validation_msg)
 
     # Load the configuration params
-    config = utils.get_config(
-        bucket=options['s3_bucket'],
-        config_obj_name=options['config_obj_name'],
-    )
+    config = utils.get_config(action=options['action'])
 
-    results = start_warming.run(config=config)
+    action_executor = action_mapper.get_executor(action=config.action)
+
+    results = action_executor.run(config=config)
 
     return results

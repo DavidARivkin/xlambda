@@ -1,25 +1,20 @@
-import json
 from typing import Dict
 
 from xlibs import exc
 from xlibs.utils import *  # NOQA
-from xlibs.utils import get_object_from_s3
-from xlibs.professor import config
+from xlibs.utils import get_object_from_yaml
+from xlibs.professor import config, constants
 
 
-def get_config(bucket: str, config_obj_name: str) -> Dict:
-    '''Get configuration parameters for running the Warming process
-
-    :arg bucket: name of the S3 bucket where configuration object is stored
-    :arg config_obj_name: name of the configuration object in the S3 bucket
-    '''
+def get_config(*, action: str) -> Dict:
+    '''Get configuration parameters for running the Warming process'''
     try:
-        raw_config = get_object_from_s3(
-            bucket=bucket,
-            object_key=config_obj_name,
-        )
+        config_obj = get_object_from_yaml(filename=constants.CONFIG_FILENAME)
 
-        return config.XLambdaConfig(options=json.loads(raw_config))
+        return config.XLambdaConfig(
+            action=action,
+            options=config_obj,
+        )
 
     except Exception as error:
         load_config_exception = exc.XLambdaExceptionLoadConfigFailed(

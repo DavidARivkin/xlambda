@@ -1,0 +1,16 @@
+# Global Settings
+region: 'us-east-1'
+scaling:
+    max_concurrency: 50
+    min_containers: 1
+    max_containers: 50
+
+# Add your functions here
+lambda_functions:
+    - name: 'your-function-here'
+      region: 'us-east-1'
+      # Override the global scaling settings on a per function basis
+      scaling:
+        max_concurrency: 5
+        min_containers: 1
+        max_containers: 5

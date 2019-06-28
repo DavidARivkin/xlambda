@@ -1,9 +1,13 @@
 '''Mutant Classes'''
 from typing import Dict, List, Optional
+from pprint import PrettyPrinter
 
 from xlibs import async_lambda
 from xlibs.utils import get_function_name
 from xlibs.professor import constants
+
+
+pp = PrettyPrinter(indent=2)
 
 
 class Mutant():
@@ -47,7 +51,11 @@ class Wolverine(Mutant):
             for function in functions
         ]
 
+        pp.pprint(requests)
+
         response = self.execute(requests=requests)
+
+        pp.pprint(response)
 
         return [
             payload['data']
@@ -138,15 +146,20 @@ class Cyclops(Mutant):
 
         requests = [
             {
-                'function_name': self.target.name,
-                'payload': self.target.payload,
+                'function_name': self._target.name,
+                'payload': self._target.payload,
             }
             for i in range(0, self.containers_to_warm)
         ]
 
+        print(
+            f'Warming up {self.containers_to_warm} containers for '
+            f'{self._target.name} function in {self._target.region}.'
+        )
+
         self._results = self.execute(
             requests=requests,
-            region=self.target.region,
+            region=self._target.region,
         )
 
         return self

@@ -3,9 +3,10 @@ from xlibs.constants import *  # NOQA
 
 
 REQUIRED_ARGS = [
-    's3_bucket',
-    'config_obj_name'
+    'action',
 ]
+
+CONFIG_FILENAME = 'xlambda-config.yml'
 
 DEFAULT_CONFIG = {
     'region': 'us-east-1',

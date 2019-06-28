@@ -2,6 +2,11 @@ import logging
 import traceback
 from typing import Dict
 
+try:
+    import unzip_requirements  # NOQA
+except ImportError:
+    pass
+
 from xlibs import exc, response
 from xlibs.cyclops import constants, utils
 from xlibs.mutant import Cyclops
@@ -30,7 +35,7 @@ def handler(event: Dict, context: Dict) -> Dict:
     except Exception as error:
         logger.exception(error)
 
-        response.build(
+        return response.build(
             status=500,
             error={
                 'type': type(error).__name__,

@@ -1,6 +1,6 @@
 service: xlambda
 
-frameworkVersion: "=1.45.1"
+frameworkVersion: ">=1.45.1"
 
 plugins:
     - serverless-python-requirements
@@ -38,6 +38,17 @@ provider:
         STAGE: ${self:provider.stage}
     tags:
         region: ${self:provider.region}
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+            - "cloudwatch:GetMetricData"
+          Resource:
+            - "*"
+        - Effect: Allow
+          Action:
+            - "lambda:GetFunctionConfiguration"
+          Resource:
+            - "*"
 
 functions:
     professor:
@@ -49,10 +60,9 @@ functions:
                 name: XLambdaSchedule
                 description: Schedule the execution of the X-Lambda warming process.
                 rate: rate(15 minutes)
-                enabled: true
+                enabled: false
                 input:
-                    's3_bucket': 'XLambdaBucket'
-                    'config_obj_name': 'XLambdaConfig.yml'
+                    - action: warm_up
 
     wolverine:
         handler: wolverine.handler

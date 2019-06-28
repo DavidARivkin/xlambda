@@ -49,7 +49,7 @@ def execute_batch(*, functions: List, config) -> List:
     warm_results = [
         result
         for functions_batch in warm_batches
-        for result in cyclops.warm_up(functions_demand=functions_batch)
+        for result in cyclops.burn(functions_demand=functions_batch)
     ]
 
     return {
@@ -76,7 +76,7 @@ def prepare_warm_batches(*, functions: List, max_concurrency: int) -> List:
     batches = [{'sum': 0, 'functions': []}]
 
     for f in functions:
-        demand_peak = max([term['upper'] for term in f['forecast']])
+        demand_peak = max(f['forecast'])
 
         f['warm_count'] = min(
             demand_peak,

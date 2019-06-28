@@ -8,7 +8,7 @@ REQUIRED_ARGS = [
 ]
 
 EXP_SMOOTH_PARAMS = {
-    'smoothing_level': 0.75,
-    'optimized': False,
+    'smoothing_level': 0.5,
+    'optimized': True,
     'use_brute': False,
 }

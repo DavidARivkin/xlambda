@@ -7,7 +7,8 @@ from xlibs.professor import constants
 
 class XLambdaConfig():
 
-    def __init__(self, options: Dict):
+    def __init__(self, action: str, options: Dict):
+        self.action = action
         self.options = self.validate_options(options=copy.deepcopy(options))
 
     @property

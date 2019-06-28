@@ -52,7 +52,7 @@ def format_settings(*, settings: Dict) -> Dict:
     formatted = {
         'runtime': normalize_runtime(aws_runtime=settings['Runtime']),
         'memory_size': settings['MemorySize'],
-        'timeout': settings['Timeout'],
+        'timeout': settings['Timeout'] * 1000,  # Convdrt to milliseconds
         'is_in_vpc': len(settings['VpcConfig']['VpcId']) > 0,
     }
 

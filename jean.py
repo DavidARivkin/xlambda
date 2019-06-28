@@ -34,7 +34,7 @@ def handler(event: Dict, context: Dict) -> Dict:
     except Exception as error:
         logger.exception(error)
 
-        response.build(
+        return response.build(
             status=500,
             error={
                 'type': type(error).__name__,

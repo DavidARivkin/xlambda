@@ -10,7 +10,7 @@ from xlibs.utils import *  # NOQA
 
 def forecasting(*, metrics: List, timeframe: int) -> List:
     '''Estimate forecasting for Lambda container demand'''
-    data = [metric['value'] for metric in metrics]
+    data = [float(val) for val in metrics.values()]
 
     model = SimpleExpSmoothing(endog=data)
     fitted_model = model.fit(**EXP_SMOOTH_PARAMS)
