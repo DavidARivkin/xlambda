@@ -8,9 +8,11 @@ scaling:
 # Add your functions here
 lambda_functions:
     - name: 'your-function-here'
+      # The parameters below are optional. X-Lambda will default to the global
+      # settings, if not set on the function level
       region: 'us-east-1'
-      # Override the global scaling settings on a per function basis
       scaling:
         max_concurrency: 5
         min_containers: 1
         max_containers: 5
+    - name: 'yet-another-function'

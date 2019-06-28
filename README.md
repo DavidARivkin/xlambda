@@ -44,23 +44,62 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 1. Make sure your system meets the requirements above
 2. Download or clone X-Lambda repo
 3. Install Python requirements: `pip install -r requirements` ([virtualenv](https://docs.python.org/3/tutorial/venv.html) is highly recommended)
+4. Install npm libraries: `npm install`
 
 ### Setup your configuration options
 
-Create a custom YAML file following this pattern:
+Customize the `xlambda-config.yml` file in the project root path. It has two main blocks of settings:
 
-_PENDING: Detail YAML template here..._
+* Global settings
+* Lambda functions list
+
+In global settings, you will provide the default AWS region and scaling options.
+
+In functions list, for each Lambda you would like to keep warm, provide at least the function name. Region and function-level scaling are optional (will default to global settings if not set).
+
+**Enforce container count boundaries**
+
+You must enforce lower and upper boundaries for how many containers X-Lambda should warm up. That's important because our internal forecasts can generate pretty much any number, and that could be dangerous.
+
+* `min_containers` will make sure a minimum amount of containers are warmed, regardless of X-Lambda forecasting a lower need. It can be set to 0 (zero).
+* `max_containers` will limit to a maximum the containers getting warmed, even if we forecast a higher demand.
+* `max_concurrency` parameter will set a cap on total number of concurrent requests to all your Lambdas combined.
+
+`max_concurrency` explained:
+
+Consider:
+
+* You have Lambdas A, B and C
+* The forecasted container demands are: A (15), B (15), C (30)
+
+If you set `max_concurrency` to 30, we will first warm up A and B concurrently (totalling 30 requests) and, after finished with them, we will process the last one. This option gives you control to prevent X-Lambda from exhausting the [Lambda concurrency quota](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html) on your AWS account.
 
 ### Adjust your Lambda functions
 
-Please follow these instructions (**PENDING LINK**) to adapt your Lambda function handlers to respond appropriatelly to warming requests.
+Your Lambda function handlers need an adaptation to respond appropriatelly to warming requests. When X-Lambda sends a warming request, it will provide a payload similar to this:
+
+```
+{
+    "xlambda": {
+        "action": "warm_up",
+        "settings": {
+            "startup_time": 1234
+        }
+    }
+}
+```
+
+We recommend you to short-circuit your function upon receiving these warming requests and skip the execution of your real code, returning an early response.
+
+It is also paramount that, if the invocation is being served by a previously warmed container, it waits a certain period of time before returning or terminating the execution. This makes sure these containers are not being reused during the warming process. The `startup_time` parameter will provide how much time (in milliseconds) is safe for your function to sleep. When in doubt whether the invocation is in a pre-warmed container, sleep as default for all warming requests.
+
+More on this in the [Warming dynamics](https://github.com/dashbird/xlambda/blob/master/README.md#warming-dynamics) chapter below.
 
 ### Deployment
 
 1. Create an S3 bucket (or use an existing one) and upload your YAML configuration options
 2. In the `serverless.yml` template, customize:
   * In which AWS region you would like to run X-Lambda (under `provider.region`)
-  * The input S3 Bucket and Object names according to the ones you created in the previous step, (under `functions.professor.events.schedule`)
 3. Run the serverless template: `serverless deploy`
 
 ### Contribute
