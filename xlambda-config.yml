@@ -1,11 +1,13 @@
-# Global Settings
+# GLOBAL SETTINGS
 region: 'us-east-1'
 scaling:
     max_concurrency: 50
     min_containers: 1
     max_containers: 50
 
-# Add your functions here
+# ADD YOUR FUNCTIONS HERE
+# WARNING: it is recommended to declare up to 50 functions here; more on that
+# here: https://github.com/dashbird/xlambda/#scalability
 lambda_functions:
     - name: 'your-function-here'
       # The parameters below are optional. X-Lambda will default to the global
