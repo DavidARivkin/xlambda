@@ -97,10 +97,8 @@ More on this in the [Warming dynamics](https://github.com/dashbird/xlambda/blob/
 
 ### Deployment
 
-1. Create an S3 bucket (or use an existing one) and upload your YAML configuration options
-2. In the `serverless.yml` template, customize:
-  * In which AWS region you would like to run X-Lambda (under `provider.region`)
-3. Run the serverless template: `serverless deploy`
+1. Check the `serverless.yml` template and see if you'd like to customize anything (the region where X-Lambda will get deployed, for example - default is `us-east-1`)
+2. Run the serverless template: `serverless deploy`
 
 ### Contribute
 
