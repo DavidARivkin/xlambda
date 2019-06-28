@@ -43,7 +43,7 @@ It is themed after X-Men characters. Because, well, why not name a Lambda functi
 
 1. Make sure your system meets the requirements above
 2. Download or clone X-Lambda repo
-3. Install Python requirements: `pip install -r requirements` ([virtualenv](https://docs.python.org/3/tutorial/venv.html) is highly recommended)
+3. Install Python requirements: `pip install -r requirements.txt` ([virtualenv](https://docs.python.org/3/tutorial/venv.html) is highly recommended)
 4. Install npm libraries: `npm install`
 
 ### Setup your configuration options
