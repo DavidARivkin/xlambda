@@ -18,7 +18,9 @@ package:
     exclude:
         - __pycache__/**
         - bin/**
+        - docs/**
         - images/**
+        - include/**
         - lib/**
         - lib64/**
         - tests/**
@@ -60,21 +62,21 @@ functions:
                 name: XLambdaSchedule
                 description: Schedule the execution of the X-Lambda warming process.
                 rate: rate(15 minutes)
-                enabled: false
+                enabled: true
                 input:
                     - action: warm_up
 
     wolverine:
         handler: wolverine.handler
         name: xlambda-wolverine-${self:provider.stage}
-        description: Get execution history, request prediction and trigger warming.
+        description: Get execution history and function data.
 
     jean:
         handler: jean.handler
         name: xlambda-jean-${self:provider.stage}
-        description: Predict how many containers should be kept warm.
+        description: Predict how many containers should be warmed.
 
     cyclops:
         handler: cyclops.handler
         name: xlambda-cyclops-${self:provider.stage}
-        description: Fire up Lambdas concurrently to force warming of containers.
+        description: Fire up Lambdas concurrently to warm up containers.
