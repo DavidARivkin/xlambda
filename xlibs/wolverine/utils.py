@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 
 from xlibs import exc
 from xlibs.utils import *  # NOQA
-from xlibs.wolverine import cloudwatch_wrapper as cloudwatch, constants
+from xlibs.wolverine import aws_api_wrapper, constants
 
 
 def get_lambda_info(*, function_name: str, region: str) -> List:
@@ -13,7 +13,7 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     now = datetime.datetime.utcnow()
     start_time = now - datetime.timedelta(days=constants.METRICS_DAYS_AGO)
 
-    status, metrics = cloudwatch.get_metric_data(
+    status, metrics = aws_api_wrapper.get_metric_data(
         function_name=function_name,
         region_name=region,
         period=constants.METRICS_TIME_PERIOD,
@@ -25,7 +25,7 @@ def get_lambda_info(*, function_name: str, region: str) -> List:
     if status != 200:
         raise exc.XLambdaExceptionGetMetricsFailed()
 
-    status, settings = cloudwatch.get_settings(
+    status, settings = aws_api_wrapper.get_settings(
         function_name=function_name,
         region=region,
     )

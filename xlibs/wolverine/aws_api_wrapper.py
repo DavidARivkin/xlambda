@@ -1,4 +1,4 @@
-'''Wrapper functions to interact with AWS CloudWatch API endpoints'''
+'''Wrapper functions to interact with AWS API endpoints'''
 import datetime
 
 import boto3
