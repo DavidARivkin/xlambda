@@ -19,8 +19,6 @@ When X-Lambda sends a warming request, it will provide a payload similar to this
 
 ## Handling the warming payload
 
-> There's a [Python helper library](https://pypi.org/project/xlambda-helper/) that you can use to decorate your handler function. A nodejs version is coming soon! (activate Github watching to receive updates)
-
 We recommend you to short-circuit your function upon receiving these warming requests and skip the execution of your real code, returning an early response.
 
 It is also paramount that, if the invocation is being served by a previously warmed container, it waits a certain period of time before returning or terminating the execution. This makes sure these containers are not being reused during the warming process. The `startup_time` parameter will provide how much time (in milliseconds) is safe for your function to sleep. When in doubt whether the invocation is in a pre-warmed container, sleep as default for all warming requests.
